@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes"/>
+    <meta name="theme-color" content="#53a8d9">
+
+    <title>My Site's Title</title>
+    <meta name="description" content="My Site's Description">
+
+    <link rel="home" href="{{ siteUrl }}" />
+
+</head>
+
+    <body>
+
+        {##
+         # This is the pageconfig object. It will be merged in with the default
+         # Config object in javascript
+         #}
+        <script>
+            var PageConfig = {% block pageConfig %}{};{% endblock %}
+        </script>
+
+        {##
+         # This is the dbConfig object. It will be merged in with the default
+         # Config object in javascript
+         #}
+         <script>
+             var DBConfig = {
+                 serverTime: {{ date().timestamp }},
+             };
+         </script>
+
+        {% block content %}
+        {% endblock %}
+
+        {##
+         # Enable webpack on dev. The hashed js file will be
+         # injected in real life.
+         #}
+        {% if craft.config.devMode %}
+            <script src="http://webpack:8080/app.bundle.js"></script>
+        {% endif %}
+    </body>
+</html>

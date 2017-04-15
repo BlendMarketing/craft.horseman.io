@@ -1,0 +1,14 @@
+*.sw*
+.env
+craft/storage/
+/vendor/
+craft/plugins/
+
+node_modules/
+npm-debug.log
+
+.sass-cache/
+.grunt/
+
+public/uploads/
+public/bundle/
