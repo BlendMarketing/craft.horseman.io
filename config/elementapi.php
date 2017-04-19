@@ -8,8 +8,12 @@ return [
     ],
     'endpoints' => [
         craft()->request->path => function(){
+            HeaderHelper::setHeader([
+                'Access-Control-Allow-Origin' => 'http://horseman.dev'
+            ]);
+
             $segments = craft()->request->getSegments();
-            $slug = preg_replace("/.json/", "", $segments[count($segments) - 1]);
+            $slug = $segments[count($segments) - 1];
             return [
                 'criteria' => [
                     'section' => "pages",
@@ -21,6 +25,7 @@ return [
                     return [
                         'title' => $entry->title,
                         'id' => $entry->id,
+                        'body' => $entry->body ? $entry->body->getParsedContent() : "",
                     ];
                 },
             ];
