@@ -21,6 +21,8 @@ $componentTransformer = function(EntryModel $entry) {
 
     return [
         "title" => $entry->title,
+        "slug" => $entry->slug,
+        "url" => "http://craft.horseman.dev/components/{$entry->slug}.json",
         "id" => $entry->id,
         "authors" => $authors,
         "components" => $components,
