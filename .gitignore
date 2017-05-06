@@ -1,8 +1,9 @@
+.DS_Store
+**/.DS_Store
 *.sw*
 .env
 craft/storage/
 /vendor/
-craft/plugins/
 
 node_modules/
 npm-debug.log
