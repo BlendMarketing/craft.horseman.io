@@ -1,0 +1,41 @@
+{% for section in craft.sections.getAllSections() %}
+<h2>{{ section.name }} ({{ section.handle }})</h2>
+<h4>Entry Types:</h4>
+<ul>
+    {% for type in section.getEntryTypes() %}
+    <li>{{ type.handle }}</li>
+        {% set fieldLayout = type.getFieldLayout() %}
+        {% set tabs = fieldLayout.getTabs() %}
+        {% set fields = [] %}
+        {% for tab in tabs %}
+            {% set fields = fields|merge(tab.getFields()) %}
+        {% endfor %}
+        <ul>    
+            {% for fieldContainer in fields %}
+                {% set field = fieldContainer.field %}
+                <li>{{ field.handle }} - {{ field.type }}</li>
+                {% if field.type == "Matrix" %}
+                    <ul>
+            {% for block in field.fieldType.settings.blockTypes %}
+                <li>{{ block.handle }}</li> 
+                <ul>
+                {% for matrixField in block.fields %}
+                <li>{{ matrixField.handle }}</li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if field.type == "Dropdown" %}
+                    <ul>
+                    {% for option in field.fieldType.options %}
+                    <li>{{ option.value }}</li>    
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</ul>
+{% endfor %}
+
