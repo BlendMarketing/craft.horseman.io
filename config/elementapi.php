@@ -1,68 +1,20 @@
 <?php
 namespace Craft;
 
-$componentTransformer = function(EntryModel $entry) {
-
-    $authors = [];
-    $components = [];
-    foreach ($entry->authors as $author) {
-        $authors[] = $author->title;
-    }
-
-    foreach ($entry->components as $block) {
-        $blockValues = [];
-        $fieldList = $block->getFieldLayout()->getFields();
-        foreach ($fieldList as $field) {
-            $handle = $field->getField()->handle;
-            $blockValues[$handle] = $block->{$handle};
-        }
-        $components[] = $blockValues;
-    }
-
-    return [
-        "title" => $entry->title,
-        "slug" => $entry->slug,
-        "url" => "http://craft.horseman.dev/components/{$entry->slug}.json",
-        "id" => $entry->id,
-        "authors" => $authors,
-        "components" => $components,
-    ];
-};
-
-
 return [
     "defaults" => [
         "elementsPerPage" => 10,
         "elementType" => "Entry",
     ],
     "endpoints" => [
-        "components.json" => function() use ($componentTransformer) {
-            HeaderHelper::setHeader([
-                "Access-Control-Allow-Origin" => "http://horseman.dev"
-            ]);
+        "<section:{slug}>.json" => function($section) use ($transformerEntrypoint) {
+            require craft()->path->getConfigPath().'UniversalTransformer.php';
             return [
                 "criteria" => [
-                    "section" => "components",
+                    "section" => $section,
                 ],
-                "transformer" => $componentTransformer,
+                "transformer" => 'Craft\UniversalTransformer',
             ];
         },
-        "components/<slug:{slug}>.json" => function($slug) use ($componentTransformer) {
-
-            HeaderHelper::setHeader([
-                "Access-Control-Allow-Origin" => "http://horseman.dev"
-            ]);
-
-
-            return [
-                "criteria" => [
-                    "section" => "components",
-                    "slug" => $slug,
-                ],
-                "paginate" => false,
-                "first" => true,
-                "transformer" => $componentTransformer,
-            ];
-        },
-    ]
-];
+        ]
+    ];
