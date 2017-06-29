@@ -1,20 +1,26 @@
 <?php
 namespace Craft;
 
+//Load $endpoints
+require craft()->path->getConfigPath().'elements.php';
+
+$endpointEndpoint = [
+    "api/endpoints.json" => function() use ($enpoints) {
+        require craft()->path->getConfigPath().'EndpointTransformer.php';
+        return [
+            "first" => true,
+            "transformer" => 'Craft\EndpointTransformer',
+        ];
+    }
+];
+
+$finalEndpoints =  array_merge($endpoints,$endpointEndpoint);
 return [
     "defaults" => [
         "elementsPerPage" => 10,
         "elementType" => "Entry",
     ],
-    "endpoints" => [
-        "<section:{slug}>.json" => function($section) use ($transformerEntrypoint) {
-            require craft()->path->getConfigPath().'UniversalTransformer.php';
-            return [
-                "criteria" => [
-                    "section" => $section,
-                ],
-                "transformer" => 'Craft\UniversalTransformer',
-            ];
-        },
-        ]
+    "endpoints" => $finalEndpoints,
     ];
+
+    die;
