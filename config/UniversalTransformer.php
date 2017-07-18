@@ -66,6 +66,9 @@ class UniversalTransformer extends TransformerAbstract
     }
 
 
+    public function CategoryTransformer($data){
+        return $data;
+    }
     public function PlainTextTransformer($data, Array $settings){
         return $data;
     }
