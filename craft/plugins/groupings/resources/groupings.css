@@ -1,0 +1,18 @@
+.groupings--group-start > .titlebar {
+    background: #333f4d;
+}
+
+.groupings--group-end .titlebar {
+    background: #F4B638;
+}
+
+.groupings--group-child {
+    margin-left: 2em;
+}
+
+.groupings--group-start > .titlebar > .blocktype,
+.groupings--group-start > .actions a,
+.groupings--group-start > .actions a:before
+{
+    color: #d7d9db;
+}

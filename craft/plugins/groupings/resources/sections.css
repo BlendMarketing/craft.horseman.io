@@ -1,0 +1,18 @@
+.sections--section-start > .titlebar {
+    background: #333f4d;
+}
+
+.sections--section-end .titlebar {
+    background: #F4B638;
+}
+
+.sections--section-child {
+    margin-left: 2em;
+}
+
+.sections--section-start > .titlebar > .blocktype,
+.sections--section-start > .actions a,
+.sections--section-start > .actions a:before
+{
+    color: #d7d9db;
+}
