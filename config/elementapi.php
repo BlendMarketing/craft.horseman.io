@@ -1,6 +1,13 @@
 <?php
 namespace Craft;
 
+
+HeaderHelper::setHeader([
+    "Access-Control-Allow-Origin" => "*",
+	"Content-Type" => "application/json",
+    "Access-Control-Allow-Credentials" => "true",
+]);
+
 //Load $endpoints
 require craft()->path->getConfigPath().'elements.php';
 
