@@ -7,10 +7,15 @@ use League\Fractal\TransformerAbstract;
 
 class UniversalTransformer extends TransformerAbstract
 {
+    private $depth;
+
     public function transform(EntryModel $entry)
     {
+        $this->depth = 0;
+        HeaderHelper::setHeader(["Access-Control-Allow-Origin" => "http://sis.dev"]);
         $data = $this->EntryTransformer($entry);
         $data['type'] = $entry->type->handle;
+        $data['editLink'] = "http://craft.sis.dev/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
         $fieldData =  $this->BaseObjectTransform($entry);
         return array_merge($data,$fieldData);
     }
@@ -18,7 +23,12 @@ class UniversalTransformer extends TransformerAbstract
     public function BaseObjectTransform($object)
     {
         //Get fields for object
-        $fieldLayout = $object->type->getFieldLayout();
+        if(isset($object->type)){
+            $fieldLayout = $object->type->getFieldLayout();
+        }else{
+            //Some Base Objects don't have types
+            $fieldLayout = $object->getFieldLayout();
+        }
         $tabs = $fieldLayout->getTabs();
         $fields = [];
         //Flatten fields to one array
@@ -45,7 +55,7 @@ class UniversalTransformer extends TransformerAbstract
                 //Determin if this is type Element Criteria
                 if(gettype($field['data']) == "object"){
                     if(get_class($field['data']) == "Craft\ElementCriteriaModel"){
-                    $transformerName = "ElementsCriteriaTransformer";
+                        $transformerName = "ElementsCriteriaTransformer";
                     }
                 }
                 $data[$handle] = $this->$transformerName($field['data'],$field['settings']);
@@ -59,21 +69,72 @@ class UniversalTransformer extends TransformerAbstract
     public function PlainTextTransformer($data, Array $settings){
         return $data;
     }
+    public function DateTransformer(DateTime $data, Array $settings){
+        //var_dump($data);
+        //var_dump($settings);
+        //die;
+    }
     public function RichTextTransformer(RichTextData $data, Array $settings){
         return $data->getParsedContent();
     }
+    public function DropdownTransformer(SingleOptionFieldData $data, Array $settings){
+        if(!$data->selected){
+            return false;
+        }
+        return [
+            "value" => $data->value,
+            "label" => $data->label,
+        ];
+    }
+    public function TableTransformer($data){
+        return $data;
+    }
 
+    public function NumberTransformer($data){
+        return $data;
+    }
+
+    public function LightswitchTransformer($data){
+        return $data;
+    }
+
+    public function UserTransformer(UserModel $user){
+            $baseUserData = [
+                "fullName" => $user->fullName,
+                "firstName" => $user->firstName,
+                "lastName" => $user->lastName
+            ];
+            $data = $this->BaseObjectTransform($user);
+            $data['editLink'] = "http://craft.sis.dev/admin/users/{$user->id}";
+            $data = array_merge($baseUserData,$data);
+            return $data;
+        }
     public function TagTransformer(TagModel $data){
         return $data->title;
     }
     //Different than the initial entry point since we don't want to go all the way down an infinite rabbit hole. Purposely leave it at the basics
     public function EntryTransformer(EntryModel $entry){
-        return [
+        $data =  [
             'id' => $entry->id,
             'slug' => $entry->slug,
             'title' => $entry->title,
             'url' => $entry->getUrl(),
         ];
+        $data['type'] = $entry->type->handle;
+        $data['editLink'] = "http://craft.sis.dev/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
+
+        // Have to prevent infinite recurssion.
+        // 2 Seems like a good default
+        if($this->depth > 2){
+            return $data;
+        }
+
+        // Increment here as this code my call itself eventually
+        $this->depth++;
+        $data = array_merge($data,$this->BaseObjectTransform($entry));
+        // Reset since this is run for each field
+        $this->depth--;
+        return $data;
     }
     public function MatrixBlockTransformer(MatrixBlockModel $block){
         $data = [];
