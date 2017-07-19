@@ -4,7 +4,7 @@ namespace Craft;
 
 $endpoints = [
     "<section:{slug}>/<slug:{slug}>.json" => function($section,$slug) {
-        require craft()->path->getConfigPath().'UniversalTransformer.php';
+        require craft()->path->getConfigPath().'elements/UniversalTransformer.php';
         return [
             "description" => "This is a universal transformer. Just enter the channel slug",
             "criteria" => [
@@ -16,7 +16,7 @@ $endpoints = [
         ];
     },
     "<section:{slug}>.json" => function($section) {
-        require craft()->path->getConfigPath().'UniversalTransformer.php';
+        require craft()->path->getConfigPath().'elements/UniversalTransformer.php';
         return [
             "description" => "This is a universal transformer. Just enter the channel slug",
             "criteria" => [

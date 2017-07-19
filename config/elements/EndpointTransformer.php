@@ -10,7 +10,7 @@ class EndpointTransformer  extends TransformerAbstract
     public function transform(EntryModel $entry)
     {
         //Load $endpoints
-        require craft()->path->getConfigPath().'elements.php';
+        require craft()->path->getConfigPath().'elements/elements.php';
         $endpointData = [];
         foreach($endpoints as $endpoint => $transform){
             $info = $transform("slug");

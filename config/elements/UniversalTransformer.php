@@ -12,10 +12,9 @@ class UniversalTransformer extends TransformerAbstract
     public function transform(EntryModel $entry)
     {
         $this->depth = 0;
-        HeaderHelper::setHeader(["Access-Control-Allow-Origin" => "http://sis.dev"]);
         $data = $this->EntryTransformer($entry);
         $data['type'] = $entry->type->handle;
-        $data['editLink'] = "http://craft.sis.dev/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
+        $data['editLink'] = "http://craft.horseman.io/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
         $fieldData =  $this->BaseObjectTransform($entry);
         return array_merge($data,$fieldData);
     }
@@ -107,7 +106,7 @@ class UniversalTransformer extends TransformerAbstract
             "lastName" => $user->lastName
         ];
         $data = $this->BaseObjectTransform($user);
-        $data['editLink'] = "http://craft.sis.dev/admin/users/{$user->id}";
+        $data['editLink'] = "http://craft.horseman.io/admin/users/{$user->id}";
         $data = array_merge($baseUserData,$data);
         return $data;
     }
@@ -123,7 +122,7 @@ class UniversalTransformer extends TransformerAbstract
             'url' => $entry->getUrl(),
         ];
         $data['type'] = $entry->type->handle;
-        $data['editLink'] = "http://craft.sis.dev/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
+        $data['editLink'] = "http://craft.horseman.io/admin/entries/{$entry->section->handle}/{$entry->id}-{$entry->slug}";
 
         // Have to prevent infinite recurssion.
         // 2 Seems like a good default

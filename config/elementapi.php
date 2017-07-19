@@ -9,11 +9,11 @@ HeaderHelper::setHeader([
 ]);
 
 //Load $endpoints
-require craft()->path->getConfigPath().'elements.php';
+require craft()->path->getConfigPath().'elements/elements.php';
 
 $endpointEndpoint = [
     "api/endpoints.json" => function() use ($enpoints) {
-        require craft()->path->getConfigPath().'EndpointTransformer.php';
+        require craft()->path->getConfigPath().'elements/EndpointTransformer.php';
         return [
             "first" => true,
             "transformer" => 'Craft\EndpointTransformer',
