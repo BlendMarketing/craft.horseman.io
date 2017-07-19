@@ -49,7 +49,6 @@ class UniversalTransformer extends TransformerAbstract
         $data = [];
         foreach($fieldData as $handle => $field){
             $data[$handle] = false;
-            //var_dump($field);
             if(!is_null($field['data'])){
                 $transformerName = $field['type'] . "Transformer";
                 //Determin if this is type Element Criteria
@@ -102,16 +101,16 @@ class UniversalTransformer extends TransformerAbstract
     }
 
     public function UserTransformer(UserModel $user){
-            $baseUserData = [
-                "fullName" => $user->fullName,
-                "firstName" => $user->firstName,
-                "lastName" => $user->lastName
-            ];
-            $data = $this->BaseObjectTransform($user);
-            $data['editLink'] = "http://craft.sis.dev/admin/users/{$user->id}";
-            $data = array_merge($baseUserData,$data);
-            return $data;
-        }
+        $baseUserData = [
+            "fullName" => $user->fullName,
+            "firstName" => $user->firstName,
+            "lastName" => $user->lastName
+        ];
+        $data = $this->BaseObjectTransform($user);
+        $data['editLink'] = "http://craft.sis.dev/admin/users/{$user->id}";
+        $data = array_merge($baseUserData,$data);
+        return $data;
+    }
     public function TagTransformer(TagModel $data){
         return $data->title;
     }
@@ -143,7 +142,10 @@ class UniversalTransformer extends TransformerAbstract
         $data = [];
         $data['type'] = $block->type->handle;
         $blockData =  $this->BaseObjectTransform($block);
-        return array_merge($data,$blockData);
+        //Manipulate Content Blocks
+        $data = array_merge($data,$blockData);
+        $data = $this->parseContentBlock($data);
+        return $data;
     }
 
     public function ElementsCriteriaTransformer(ElementCriteriaModel $elements, Array $settings){
@@ -159,6 +161,8 @@ class UniversalTransformer extends TransformerAbstract
             $transformer = $type . "Transformer";
             $data[] = $this->$transformer($element);
         }
+        $data = $this->parseSections($data);
+
         if(count($data) < 1){
             return false;
         }
@@ -171,5 +175,55 @@ class UniversalTransformer extends TransformerAbstract
     public function parseCriteria($queryString,$entry)
     {
 
+    }
+
+    public function parseSections(Array $data)
+    {
+
+        //Check if Sections were used, replay them to combine
+        $sectionData = [];
+        $isSection = false;
+        foreach($data as $key => $datum){
+            if(!isset($datum['type'])){
+                continue;
+            };
+            if($datum['type'] == "sectionStart"){
+                $isSection = true;
+            }
+            if($isSection){
+                $sectionData[] = $datum;
+                unset($data[$key]);
+            }
+            if($datum['type'] == "sectionEnd"){
+                //Strip the first and last items off, since it's meta
+                $meta = array_merge(array_pop($sectionData),array_shift($sectionData));
+                unset($meta['type']);
+
+                $section = [
+                    "type" => "section",
+                    "meta" => $meta,
+                    "data" => $sectionData,
+                ];
+                $data[$key] = $section;
+                $sectionData = [];
+                $isSection = false;
+            }
+        } 
+        //reset indexes so transformer doesn't include indexes
+        $data = array_values($data);
+        return $data;
+    }
+
+    public function parseContentBlock(Array $block){
+        if($block['type'] == "contentBlock"){
+            $content = $block['contentPieces'];
+            $module = $block['displayModule']['slug'];
+            $block = [
+                "type" => "component",
+                "component" => $module,
+                "content" => $content,
+            ];
+        } 
+        return $block;
     }
 }
