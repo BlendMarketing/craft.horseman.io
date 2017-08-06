@@ -203,12 +203,18 @@ class UniversalTransformer extends TransformerAbstract
                 //Strip the first and last items off, since it's meta
                 $meta = array_merge(array_pop($groupData),array_shift($groupData));
                 $meta["displayModule"] = $meta["displayModule"][0]["slug"];
+                $bgColor = $meta['backgroundColor']['value'];
+                $isConstrained = $meta['constrainWidth'] > 0;
                 unset($meta['type']);
+                unset($meta['constrainWidth']);
+                unset($meta['backgroundColor']);
 
                 $group = [
                     "type" => "group",
                     "meta" => $meta,
                     "data" => $groupData,
+                    "bgColor" => $bgColor,
+                    "isConstrained" => $isConstrained,
                 ];
                 $data[$key] = $group;
                 //Make sure everything is in proper order
@@ -244,12 +250,18 @@ class UniversalTransformer extends TransformerAbstract
             if($datum['type'] == "sectionEnd"){
                 //Strip the first and last items off, since it's meta
                 $meta = array_merge(array_pop($sectionData),array_shift($sectionData));
+                $bgColor = $meta['backgroundColor']['value'];
+                $isConstrained = $meta['constrainWidth'] > 0;
                 unset($meta['type']);
+                unset($meta['constrainWidth']);
+                unset($meta['backgroundColor']);
 
                 $section = [
                     "type" => "section",
                     "meta" => $meta,
                     "data" => $sectionData,
+                    "bgColor" => $bgColor,
+                    "isConstrained" => $isConstrained,
                 ];
                 $data[$key] = $section;
                 //Make sure everything is in proper order
