@@ -64,6 +64,10 @@ class UniversalTransformer extends TransformerAbstract
     }
 
 
+    public function AssetTransformer($data){
+        //For now just return url
+        return "http://craft.horseman.io{$data->url}"; 
+    }
     public function CategoryTransformer($data){
         return $data;
     }
@@ -160,6 +164,9 @@ class UniversalTransformer extends TransformerAbstract
             $transformer = $type . "Transformer";
             $data[] = $this->$transformer($element);
         }
+        
+        //Parse Groups first, then sections since groups can be in sections, but not vice versa
+        $data = $this->parseGroups($data);
         $data = $this->parseSections($data);
 
         if(count($data) < 1){
@@ -173,6 +180,47 @@ class UniversalTransformer extends TransformerAbstract
 
     public function parseCriteria($queryString,$entry)
     {
+
+    }
+
+    public function parseGroups(Array $data)
+    {
+        //Check if Groups were used, replay them to combine
+        $groupsData = [];
+        $isGroup = false;
+        foreach($data as $key => $datum){
+            if(!isset($datum['type'])){
+                continue;
+            };
+            if($datum['type'] == "groupStart"){
+                $isGroup  = true;
+            }
+            if($isGroup){
+                $groupData[] = $datum;
+                unset($data[$key]);
+            }
+            if($datum['type'] == "groupEnd"){
+                //Strip the first and last items off, since it's meta
+                $meta = array_merge(array_pop($groupData),array_shift($groupData));
+                $meta["displayModule"] = $meta["displayModule"][0]["slug"];
+                unset($meta['type']);
+
+                $group = [
+                    "type" => "group",
+                    "meta" => $meta,
+                    "data" => $groupData,
+                ];
+                $data[$key] = $group;
+                //Make sure everything is in proper order
+                ksort($data);
+
+                $groupData = [];
+                $isGroup = false;
+            }
+        } 
+        //reset indexes so transformer doesn't include indexes
+        $data = array_values($data);
+        return $data;
 
     }
 
@@ -204,6 +252,8 @@ class UniversalTransformer extends TransformerAbstract
                     "data" => $sectionData,
                 ];
                 $data[$key] = $section;
+                //Make sure everything is in proper order
+                ksort($data);
                 $sectionData = [];
                 $isSection = false;
             }
@@ -217,10 +267,13 @@ class UniversalTransformer extends TransformerAbstract
         if($block['type'] == "contentBlock"){
             $content = $block['contentPieces'];
             $module = $block['displayModule']['slug'];
+            $isConstrained = $block['constrainWidth'] > 0;
             $block = [
                 "type" => "component",
                 "component" => $module,
                 "content" => $content,
+                "bgColor" => $block['backgroundColor']['value'],
+                "isConstrained" => $isConstrained,
             ];
         } 
         return $block;
